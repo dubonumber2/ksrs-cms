@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ksrs.cms.mapper.clue.ClueRoleSourcesMapper" >
+  <resultMap id="BaseResultMap" type="com.ksrs.cms.model.RoleSourcesKey" >
+    <id column="roleId" property="roleid" jdbcType="INTEGER" />
+    <id column="resourcesId" property="resourcesid" jdbcType="INTEGER" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="com.ksrs.cms.model.RoleSourcesKey" >
+    delete from role_resources
+    where roleId = #{roleid,jdbcType=INTEGER}
+      and resourcesId = #{resourcesid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ksrs.cms.model.RoleSourcesKey" >
+    insert into role_resources (roleId, resourcesId)
+    values (#{roleid,jdbcType=INTEGER}, #{resourcesid,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ksrs.cms.model.RoleSourcesKey" >
+    insert into role_resources
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="roleid != null" >
+        roleId,
+      </if>
+      <if test="resourcesid != null" >
+        resourcesId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="roleid != null" >
+        #{roleid,jdbcType=INTEGER},
+      </if>
+      <if test="resourcesid != null" >
+        #{resourcesid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+
+  <delete id="deleteRoleResourcesByRoleId" parameterType="integer">
+    DELETE  FROM `role_resources`
+    WHERE roleId = #{roleId}
+  </delete>
+  <insert id="insertRoleResources">
+      insert into `role_resources`(roleId,resourcesId)
+      VALUES
+      <foreach collection="list" item="item" separator=",">
+         (#{roleId},#{item})
+      </foreach>
+  </insert>
+</mapper>

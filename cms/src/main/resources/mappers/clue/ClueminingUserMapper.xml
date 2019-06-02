@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ksrs.cms.mapper.clue.ClueminingUserMapper">
+
+    <resultMap id="userMap" type="com.ksrs.cms.model.clue.ClueminingUser">
+        <result property="id" column="usernumber"></result>
+        <result property="userNumber" column="usernumber"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="realName" column="realname"/>
+        <result property="userCompany" column="usercompany"/>
+        <result property="parentId" column="parentid"/>
+        <result property="dowloadAble" column="dowloadable"/>
+        <result property="isRepeat" column="isrepeat"/>
+        <result property="enable" column="enable"/>
+        <result property="startTime" column="start_time"/>
+        <result property="stopTime" column="stop_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+
+    </resultMap>
+    <resultMap id="UserDtoResultMap" type="com.ksrs.cms.dto.ClueUserDto" >
+       <result column="usernumber" property="id" jdbcType="VARCHAR"/>
+        <result column="username" property="username" jdbcType="VARCHAR" />
+        <result column="realname" property="realName" jdbcType="VARCHAR"/>
+        <result column="usernumber" property="userNumber" jdbcType="VARCHAR"/>
+        <result column="usercompany" property="userCompany" jdbcType="VARCHAR"/>
+        <result column="enable" property="enable"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="stop_time" property="stopTime"/>
+        <result column="roleDesc" property="roleName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="findByUsername" parameterType="string" resultMap="userMap">
+       select * from `cluemining_user` where username = #{username} and enable = 1 and now() BETWEEN start_time and stop_time and isdelete = 0;
+    </select>
+
+   <insert id="addUser" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.ksrs.cms.model.clue.ClueminingUser">
+       insert into `cluemining_user` (id,usernumber,username,password,realname,usercompany,parentid,dowloadable,isrepeat,start_time,stop_time)
+       VALUES( #{id},#{userNumber},#{username},#{password},#{realName},#{userCompany},#{parentId},#{dowloadAble},#{isRepeat},
+       <if test="startTime == null">
+           now(),
+       </if>
+       <if test="startTime !=null">
+           #{startTime},
+       </if>
+        #{stopTime} )
+   </insert>
+
+    <update id="deleteUserById">
+      update `cluemining_user` set isdelete = 1 where usernumber=#{id}
+    </update>
+
+    <update id="updateUserById" parameterType="com.ksrs.cms.model.clue.ClueminingUser">
+        update `cluemining_user`
+        <set >
+            <if test="password != null" >
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="realName !=null">
+                realname = #{realName,jdbcType=VARCHAR},
+            </if>
+            <if test="userCompany !=null">
+                usercompany = #{userCompany,jdbcType=VARCHAR},
+            </if>
+            <if test="dowloadAble !=null">
+                dowloadable = #{dowloadAble},
+            </if>
+            <if test="stopTime !=null">
+                stop_time = #{stopTime},
+            </if>
+            <if test="isRepeat !=null">
+                isrepeat = #{isRepeat}
+            </if>
+        </set>
+        where usernumber = #{id,jdbcType=VARCHAR} and isdelete = 0;
+    </update>
+
+    <delete id="deleteWebTypeById">
+        delete from `clue_user_webtype` where clue_user_id = #{userId}
+    </delete>
+
+    <delete id="deleteProvincesById">
+        delete from `clue_user_province` where clue_user_id = #{userId}
+    </delete>
+
+    <insert id="insertWebTypeById" >
+        insert into `clue_user_webtype` (clue_user_id,clue_webtype_id)
+        values(#{userId},#{webTypeId})
+    </insert>
+    <insert id="insertProvinceById">
+        INSERT INTO `clue_user_province` (clue_user_id,clue_province_id)
+        VALUES (#{userId},#{provinceId})
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="userMap">
+        select * from `cluemining_user` where usernumber = #{id}   and isdelete = 0
+    </select>
+
+    <select id="findClueUsers" resultMap="UserDtoResultMap">
+        select u.* from `cluemining_user` u
+        where isdelete = 0 and parentid IN ('0','-1') order by create_time DESC
+        limit #{pageSize},#{limit};
+    </select>
+
+    <select id="findChildUsersBySelectvite" resultType="com.ksrs.cms.dto.ClueChildUserDto">
+        select `usernumber` as id,usernumber as userNumber,`username` as username
+        ,`realname` as `realName`,`create_time` as createTime,`dowloadAble` as dowloadAble
+        from `cluemining_user`
+        <where>
+            parentid not in('0','-1') and isdelete =0
+            <if test="username !=null">
+                and username=#{username}
+            </if>
+            <if test="realName !=null">
+                and realname=#{realName}
+            </if>
+            <if test="parentId !=null">
+                and parentId = #{parentId}
+            </if>
+
+        </where>
+        limit #{pageSize},#{limit}
+
+
+    </select>
+
+    <select id="findChildUserTotal" resultType="Integer">
+        select count(*) from `cluemining_user` u
+        <where>
+            parentid not in('0','-1') and isdelete = 0
+            <if test="username !=null">
+                and username=#{username}
+            </if>
+            <if test="realName !=null">
+                and realname=#{realName}
+            </if>
+            <if test="parentId !=null">
+                and parentId = #{parentId}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="getUsersTotal" resultType="Integer">
+         select count(*) from `cluemining_user` u
+        where  isdelete = 0  and parentid IN ('0','-1')
+    </select>
+    <select id="selectWebType" resultType="com.ksrs.cms.resourcesUtil.WebType">
+        SELECT cw.webtype as webTypeName,cw.id as id FROM `cluemining_webtype` cw left join clue_user_webtype cuw on cw.id = cuw.clue_webtype_id where cuw.clue_user_id=#{userId};
+    </select>
+
+    <select id="selectProvince" resultType="com.ksrs.cms.resourcesUtil.Province">
+       select cp.province as provinceName ,cp.id as id from `cluemining_province` cp left join clue_user_province cup on cp.id = cup.clue_province_id where cup.clue_user_id=#{userId}
+    </select>
+
+    <update id="closeEnable">
+        update `cluemining_user`
+        set enable=0
+        where usernumber=#{id}
+    </update>
+
+    <update id="openEnable">
+        update `cluemining_user`
+        set enable=1
+        where usernumber=#{id}
+    </update>
+    <update id="updatePasswordById">
+        update `cluemining_user`
+        <set>
+            <if test="password !=null and password.length()>0">
+                password=#{password,jdbcType=VARCHAR}
+            </if>
+        </set>
+        where `usernumber` = #{id}
+    </update>
+
+    <select id="selectProvinceIds" resultType="com.ksrs.cms.resourcesUtil.Province">
+        select cp.id as id,cp.province as provinceName,sort from `cluemining_province` cp left join clue_user_province cup on cp.id = cup.clue_province_id where cup.clue_user_id=#{userId} order by sort asc
+    </select>
+
+    <select id="selectByNum"  parameterType="string" resultMap="userMap">
+        select * from `cluemining_user` where usernumber like '%${usernumber}%'
+    </select>
+
+
+</mapper>

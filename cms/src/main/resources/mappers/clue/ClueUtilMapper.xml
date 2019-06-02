@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ksrs.cms.mapper.clue.ClueUtilMapper">
+
+   <select id="selectProvice" resultType="com.ksrs.cms.model.clue.Province">
+       select * from `cluemining_province`
+       where parentId=-1 order by sort asc
+   </select>
+
+    <select id="selectWebType" resultType="com.ksrs.cms.model.clue.WebType">
+        select id,webtype as webType FROM
+        `cluemining_webtype`
+    </select>
+
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ksrs.cms.mapper.UserRoleMapper" >
+  <resultMap id="BaseResultMap" type="com.ksrs.cms.model.UserRole" >
+    <result column="userId" property="userid" jdbcType="VARCHAR" />
+    <result column="roleId" property="roleid" jdbcType="INTEGER" />
+  </resultMap>
+  <insert id="insert" parameterType="com.ksrs.cms.model.UserRole" >
+    insert into user_role (userId, roleId)
+    values (#{userid,jdbcType=VARCHAR}, #{roleid,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ksrs.cms.model.UserRole" >
+    insert into user_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="userid != null" >
+        userId,
+      </if>
+      <if test="roleid != null" >
+        roleId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="userid != null" >
+        #{userid,jdbcType=VARCHAR},
+      </if>
+      <if test="roleid != null" >
+        #{roleid,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+</mapper>

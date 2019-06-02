@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ksrs.clue.mapper.RoleMapper" >
+  <resultMap id="BaseResultMap" type="com.ksrs.clue.model.Role" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="roleName" property="roledesc" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, roleDesc
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from role
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from role
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ksrs.clue.model.Role" >
+    insert into role (id, roleDesc)
+    values (#{id,jdbcType=INTEGER}, #{roledesc,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ksrs.clue.model.Role" >
+    insert into role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="roledesc != null" >
+        roleDesc,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="roledesc != null" >
+        #{roledesc,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ksrs.clue.model.Role" >
+    update role
+    <set >
+      <if test="roledesc != null" >
+        roleDesc = #{roledesc,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ksrs.clue.model.Role" >
+    update role
+    set roleDesc = #{roledesc,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="findRoleByUserId" resultType="java.lang.String">
+    select r.roledesc from `user_role` ur left JOIN
+    `role` r on ur.roleId = r.id where ur.userId = #{userId}
+  </select>
+  <insert id="inertUserRoles" parameterType="java.util.Map">
+    INSERT  INTO `user_role` (userId,roleId)
+    VALUES (#{userId},#{roleId})
+  </insert>
+
+  <select id="findRoleIdByUserId" resultType="java.lang.Integer">
+    select roleId from user_role where userId = #{userId}
+  </select>
+  <delete id="deleteUserRoleByUserId">
+    delete from `user_role`  where userId = #{userId}
+  </delete>
+</mapper>

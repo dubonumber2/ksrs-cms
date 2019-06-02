@@ -1,0 +1,38 @@
+## servlet ##
+server:
+  servlet:
+    context-path: /admin
+  port: 8081
+  tomcat:
+    uri-encoding: UTF-8
+
+## database ##
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://10.0.0.96:3306/clueadmin?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: 123456
+  # redis
+  redis:
+    host: 10.0.0.96
+    database: 5
+    port: 6379
+    jedis:
+      pool:
+        max-idle: 8
+        min-idle: 0
+        max-active: 8
+        max-wait: -1
+    password:
+    timeout: 1800
+
+
+## mybatis ##
+mybatis:
+  mapper-locations: mappers/*.xml
+  type-aliases-package: com.ksrs.clue.model
+
+
+

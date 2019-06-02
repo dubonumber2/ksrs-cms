@@ -1,0 +1,38 @@
+## servlet ##
+server:
+  servlet:
+    context-path: /admin
+  port: 7071
+  tomcat:
+    uri-encoding: UTF-8
+
+## database ##
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://rm-8vb0cfyrd85nd5g30.mysql.zhangbei.rds.aliyuncs.com:3306/cluemining_us_admin_db?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: cluemining_write
+    password: vk=V6TC6teA_QiWkB_sY
+  # redis
+  redis:
+    host: r-8vb1a343a29637a4.redis.zhangbei.rds.aliyuncs.com
+    database: 3
+    port: 6379
+    jedis:
+      pool:
+        max-idle: 8
+        min-idle: 0
+        max-active: 8
+        max-wait: -1
+    password: Re2017sRsKSFP38dis
+    timeout: 1800
+
+
+## mybatis ##
+mybatis:
+  mapper-locations: mappers/*.xml
+  type-aliases-package: com.ksrs.clue.model
+
+
+

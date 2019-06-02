@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ksrs.clue.mapper.ClueminingUserMapper">
+
+    <resultMap id="userMap" type="com.ksrs.clue.model.ClueminingUser">
+        <result property="id" column="usernumber"></result>
+        <result property="userNumber" column="usernumber"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="realName" column="realname"/>
+        <result property="userCompany" column="usercompany"/>
+        <result property="parentId" column="parentid"/>
+        <result property="dowloadAble" column="dowloadable"/>
+        <result property="isRepeat" column="isrepeat"/>
+        <result property="enable" column="enable"/>
+        <result property="startTime" column="start_time"/>
+        <result property="stopTime" column="stop_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isPoint" column="ispoint"/>
+
+    </resultMap>
+    <resultMap id="UserDtoResultMap" type="com.ksrs.clue.dto.ClueUserDto" >
+        <result property="id" column="usernumber"></result>
+        <result column="username" property="username" jdbcType="VARCHAR" />
+        <result column="realname" property="realName" jdbcType="VARCHAR"/>
+        <result column="dowloadAble" property="dowloadAble" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+        <result column="enable" property="enable"/>
+    </resultMap>
+
+    <resultMap id="downloadMap" type="com.ksrs.clue.dto.DownLoadDto">
+        <result column="user_id" property="userId"/>
+        <result column="downloadAble" property="downloadAble"/>
+    </resultMap>
+
+
+
+    <select id="findByUsername" parameterType="string" resultMap="userMap">
+       select * from `cluemining_user` where username = #{username} and enable = 1 and now() BETWEEN start_time and stop_time and isdelete = 0;
+    </select>
+
+   <insert id="addUser" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="com.ksrs.clue.model.ClueminingUser">
+       insert into `cluemining_user` (id,usernumber,username,password,realname,usercompany,parentid,dowloadable,isrepeat,start_time,stop_time)
+       VALUES( #{id},#{userNumber},#{username},#{password},#{realName},#{userCompany},#{parentId},#{dowloadAble},#{isRepeat},
+       <if test="startTime == null">
+           now(),
+       </if>
+       <if test="startTime !=null">
+           #{startTime},
+       </if>
+        #{stopTime} )
+   </insert>
+
+    <update id="deleteUserById">
+      update `cluemining_user` set isdelete = 1 where usernumber=#{id}
+    </update>
+
+    <update id="updateUserById" parameterType="com.ksrs.clue.model.ClueminingUser">
+        update `cluemining_user`
+        <set >
+            <if test="dowloadAble !=null">
+                dowloadable = #{dowloadAble},
+            </if>
+            <if test=" username !=null">
+                username=#{username},
+            </if>
+            <if test="realName!=null">
+                realname=#{realName}
+            </if>
+
+        </set>
+        where usernumber = #{id,jdbcType=VARCHAR}  and isdelete = 0;
+    </update>
+
+    <delete id="deleteWebTypeById">
+        delete from `clue_user_webtype` where clue_user_id = #{userId}
+    </delete>
+
+    <delete id="deleteProvincesById">
+        delete from `clue_user_province` where clue_user_id = #{userId}
+    </delete>
+
+    <insert id="insertWebTypeById">
+        insert into `clue_user_webtype` (clue_user_id,clue_webtype_id)
+        values(#{userId},#{webTypeId})
+    </insert>
+    <insert id="insertProvinceById" >
+        INSERT INTO `clue_user_province` (clue_user_id,clue_province_id)
+        VALUES (#{userId},#{provinceId})
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="userMap">
+        select * from `cluemining_user` where usernumber = #{id}  and isdelete = 0
+    </select>
+
+    <select id="findClueUsers" resultMap="UserDtoResultMap">
+        select u.* from `cluemining_user` u
+        where isdelete = 0 and parentid=#{userId}
+         order by create_time DESC
+        limit #{pageSize},#{limit};
+    </select>
+
+    <select id="getUsersTotal" resultType="Integer">
+         select count(*) from `cluemining_user` u
+        where  isdelete = 0 and parentid=#{userId}
+    </select>
+    <select id="selectWebType" resultType="string">
+        SELECT cw.webtype FROM `cluemining_webtype` cw left join clue_user_webtype cuw on cw.id = cuw.clue_webtype_id where cuw.clue_user_id=#{userId};
+    </select>
+
+    <select id="selectProvince" resultType="string">
+       select cp.province from `cluemining_province` cp left join clue_user_province cup on cp.id = cup.clue_province_id where cup.clue_user_id=#{userId}
+    </select>
+
+    <select id="selectInfoWebType" resultType="com.ksrs.clue.resourcesUtil.WebType">
+        select cw.id as id,cw.webtype as webTypeName,paraName from `cluemining_webtype` cw
+        where cw.id not IN
+        <foreach collection="list" item="value" open="(" close=")" separator=",">
+            #{value}
+        </foreach>
+    </select>
+
+    <select id="selectWebTypeIds" resultType="com.ksrs.clue.resourcesUtil.WebType">
+                SELECT cw.id as id,cw.webtype as webTypeName,paraName FROM `cluemining_webtype` cw left join clue_user_webtype cuw on cw.id = cuw.clue_webtype_id where cuw.clue_user_id=#{userId};
+    </select>
+
+    <select id="selectProvinceIds" resultType="com.ksrs.clue.resourcesUtil.Province">
+               select cp.id as id,cp.province as provinceName,sort from `cluemining_province` cp left join clue_user_province cup on cp.id = cup.clue_province_id where cup.clue_user_id=#{userId} order by sort asc
+    </select>
+
+    <update id="updatePasswordById">
+        update `cluemining_user`
+        <set>
+            <if test="password !=null and password.length()>0">
+                password=#{password,jdbcType=VARCHAR}
+            </if>
+        </set>
+        where `usernumber` = #{id}
+    </update>
+
+    <select id="selectProvinceIdsNotInList" resultType="com.ksrs.clue.resourcesUtil.Province">
+        select `id`,province as provinceName ,sort from `cluemining_province`
+        where `parentId` = -1 and id not IN
+        <foreach  collection="list" item="value" open="(" close=")" separator=",">
+            #{value}
+        </foreach>
+    </select>
+
+    <select id="selectProvinceCity" resultType="com.ksrs.clue.resourcesUtil.City">
+        select id,province as cityName from `cluemining_province`
+        where parentId=#{provinceId}
+    </select>
+
+    <select id="selectAllProvince" resultType="com.ksrs.clue.resourcesUtil.Province">
+        select id,province as provinceName,sort from `cluemining_province` where parentId =-1 order by sort asc
+    </select>
+
+    <select id="selectAllWebType" resultType="com.ksrs.clue.resourcesUtil.WebType">
+         SELECT cw.id as id,cw.webtype as webTypeName,paraName FROM `cluemining_webtype` cw
+   </select>
+
+    <update id="closeIsPoint" parameterType="string">
+        UPDATE `cluemining_user`
+        SET `ispoint` = 0 where usernumber = #{id}
+     </update>
+
+    <select id="findIsPoint" parameterType="string">
+        select ispoint from `cluemining_user`
+        where usernumber=#{id}
+    </select>
+
+    <update id="closeEnable">
+        update `cluemining_user`
+        set enable=0
+        where usernumber=#{id}
+    </update>
+
+    <update id="openEnable">
+        update `cluemining_user`
+        set enable=1
+        where usernumber=#{id}
+    </update>
+
+    <select id="findChildUsersBySelectvite" resultMap="UserDtoResultMap">
+        SELECT cu.usernumber ,cu.username,cu.realname,cud.downloadAble as dowloadAble,cu.create_time,cu.`enable` FROM `cluemining_user` cu inner join `clue_update_download` cud
+        on cud.user_id = cu.usernumber
+        <where>
+            cu.parentid = #{parentId} and isdelete =0
+            <if test="username !=null and username.length()>0">
+                and cu.username=#{username}
+            </if>
+            <if test="realName !=null and realName.length()>0">
+                and cu.realname=#{realName}
+            </if>
+            <if test="createTime!=null and createTime.length()>0">
+                and cu.create_time like '%${createTime}%'
+            </if>
+        </where>
+        order by cu.create_time DESC
+        limit #{pageSize},#{limit}
+
+
+    </select>
+
+    <select id="findChildUserTotalSelective" resultType="Integer">
+        select count(*) from `cluemining_user` u
+        <where>
+            parentid = #{parentId} and isdelete = 0
+            <if test="username !=null and username.length()>0">
+                and username=#{username}
+            </if>
+            <if test="realName !=null and realName.length()>0">
+                and realname=#{realName}
+            </if>
+            <if test="createTime!=null and createTime.length()>0">
+                and create_time like '%${createTime}%'
+            </if>
+        </where>
+    </select>
+
+    <select id="findOldUserPassword" resultType="string">
+        select `password` from `clue_old_user_tmp` where `username` = #{username}
+    </select>
+
+    <select id="findDownloadUserIds" resultType="string">
+        select `user_id` from `clue_update_download`
+    </select>
+
+    <insert id="insertDowloadUpdate" parameterType="com.ksrs.clue.dto.DownLoadDto">
+        insert into `clue_update_download`(`user_id`,`downloadAble`)
+         VALUES(#{userId},#{downloadAble})
+    </insert>
+
+    <update id="updateDowloadUpdate" parameterType="com.ksrs.clue.dto.DownLoadDto">
+        update `clue_update_download` SET
+        `downloadAble` = #{downloadAble}
+        where `user_id` = #{userId}
+    </update>
+
+    <select id="findYesterday" resultMap="downloadMap">
+        select * from `clue_update_download`
+        where DATE_FORMAT(`update_time`,'%Y-%m-%d') = DATE_FORMAT(DATE_SUB(NOW(),INTERVAL 1 day),'%Y-%m-%d')
+    </select>
+
+    <select id="findDowloadByUserId" parameterType="string" resultMap="downloadMap">
+        select * from `clue_update_download`
+        where `user_id` = #{userId}
+    </select>
+
+
+
+
+
+
+
+
+
+
+</mapper>
